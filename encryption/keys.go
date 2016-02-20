@@ -13,7 +13,6 @@ import (
 type Key struct {
 	PrivateKey *rsa.PrivateKey
 	PublicKey  *rsa.PublicKey
-	Bits       int
 }
 
 func (key *Key) Sign(payLoad []byte) ([]byte, error) {
@@ -85,9 +84,7 @@ func DecodePem(asn1Der []byte) (*Key, error) {
 
 //GenerateKeyPair will generate an RSA Private/Public Key Pair.
 func GenerateKeyPair(bits int) (*Key, error) {
-	key := &Key{
-		Bits: bits,
-	}
+	key := &Key{}
 	var err error
 
 	key.PrivateKey, err = rsa.GenerateKey(rand.Reader, bits)
