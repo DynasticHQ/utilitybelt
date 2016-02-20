@@ -10,12 +10,12 @@ import (
 	"errors"
 )
 
-type Key struct {
+type KeyPair struct {
 	PrivateKey *rsa.PrivateKey
 	PublicKey  *rsa.PublicKey
 }
 
-func (key *Key) Sign(payLoad []byte) ([]byte, error) {
+func (key *KeyPair) Sign(payLoad []byte) ([]byte, error) {
 	rng := rand.Reader
 	signedPayload := sha256.Sum256(payLoad)
 
@@ -29,7 +29,7 @@ func (key *Key) Sign(payLoad []byte) ([]byte, error) {
 //Headers
 //base64-encoded Bytes
 //-----END Type-----
-func (key *Key) EncodePrivateKey() []byte {
+func (key *KeyPair) EncodePrivateKey() []byte {
 	privASN1 := x509.MarshalPKCS1PrivateKey(key.PrivateKey)
 	pemData := pem.EncodeToMemory(
 		&pem.Block{
@@ -46,7 +46,7 @@ func (key *Key) EncodePrivateKey() []byte {
 //Headers
 //base64-encoded Bytes
 //-----END Type-----
-func (key *Key) EncodePublicKey() ([]byte, error) {
+func (key *KeyPair) EncodePublicKey() ([]byte, error) {
 	pubASN1, err := x509.MarshalPKIXPublicKey(key.PublicKey)
 	if err != nil {
 		return pubASN1, err
@@ -60,9 +60,25 @@ func (key *Key) EncodePublicKey() ([]byte, error) {
 	return pemData, err
 }
 
-//DecodePrivateKey will decode an ASN1 der encoded form into a Private and Public key
-func DecodePem(asn1Der []byte) (*Key, error) {
-	key := &Key{}
+func DecodePublicKey(asn1Der []byte) (*KeyPair, error) {
+	key := &KeyPair{}
+	var decodedBlock *pem.Block
+	var publicKey interface{}
+	var err error
+
+	decodedBlock, _ = pem.Decode(asn1Der)
+	if decodedBlock == nil || decodedBlock.Type != "RSA PUBLIC KEY" {
+		err = errors.New("No valid PEM data found")
+		return key, err
+	}
+	publicKey, err = x509.ParsePKIXPublicKey(decodedBlock.Bytes)
+	key.PublicKey = publicKey.(*rsa.PublicKey)
+	return key, err
+}
+
+//DecodePem will decode an ASN1 der encoded form into a Private and Public key
+func DecodePem(asn1Der []byte) (*KeyPair, error) {
+	key := &KeyPair{}
 	var decodedBlock *pem.Block
 	var err error
 
@@ -83,8 +99,8 @@ func DecodePem(asn1Der []byte) (*Key, error) {
 }
 
 //GenerateKeyPair will generate an RSA Private/Public Key Pair.
-func GenerateKeyPair(bits int) (*Key, error) {
-	key := &Key{}
+func GenerateKeyPair(bits int) (*KeyPair, error) {
+	key := &KeyPair{}
 	var err error
 
 	key.PrivateKey, err = rsa.GenerateKey(rand.Reader, bits)
