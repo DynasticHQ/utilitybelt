@@ -10,12 +10,12 @@ import (
 	"errors"
 )
 
-type KeyPair struct {
+type RSAKeyPair struct {
 	PrivateKey *rsa.PrivateKey
 	PublicKey  *rsa.PublicKey
 }
 
-func (key *KeyPair) Sign(payLoad []byte) ([]byte, error) {
+func (key *RSAKeyPair) Sign(payLoad []byte) ([]byte, error) {
 	rng := rand.Reader
 	signedPayload := sha256.Sum256(payLoad)
 
@@ -29,7 +29,7 @@ func (key *KeyPair) Sign(payLoad []byte) ([]byte, error) {
 //Headers
 //base64-encoded Bytes
 //-----END Type-----
-func (key *KeyPair) EncodePrivateKey() []byte {
+func (key *RSAKeyPair) EncodePrivateKey() []byte {
 	privASN1 := x509.MarshalPKCS1PrivateKey(key.PrivateKey)
 	pemData := pem.EncodeToMemory(
 		&pem.Block{
@@ -46,7 +46,7 @@ func (key *KeyPair) EncodePrivateKey() []byte {
 //Headers
 //base64-encoded Bytes
 //-----END Type-----
-func (key *KeyPair) EncodePublicKey() ([]byte, error) {
+func (key *RSAKeyPair) EncodePublicKey() ([]byte, error) {
 	pubASN1, err := x509.MarshalPKIXPublicKey(key.PublicKey)
 	if err != nil {
 		return pubASN1, err
@@ -60,8 +60,8 @@ func (key *KeyPair) EncodePublicKey() ([]byte, error) {
 	return pemData, err
 }
 
-func DecodePublicKey(asn1Der []byte) (*KeyPair, error) {
-	key := &KeyPair{}
+func DecodePublicKey(asn1Der []byte) (*RSAKeyPair, error) {
+	key := &RSAKeyPair{}
 	var decodedBlock *pem.Block
 	var publicKey interface{}
 	var err error
@@ -77,8 +77,8 @@ func DecodePublicKey(asn1Der []byte) (*KeyPair, error) {
 }
 
 //DecodePem will decode an ASN1 der encoded form into a Private and Public key
-func DecodePem(asn1Der []byte) (*KeyPair, error) {
-	key := &KeyPair{}
+func DecodePem(asn1Der []byte) (*RSAKeyPair, error) {
+	key := &RSAKeyPair{}
 	var decodedBlock *pem.Block
 	var err error
 
@@ -99,8 +99,8 @@ func DecodePem(asn1Der []byte) (*KeyPair, error) {
 }
 
 //GenerateKeyPair will generate an RSA Private/Public Key Pair.
-func GenerateKeyPair(bits int) (*KeyPair, error) {
-	key := &KeyPair{}
+func GenerateKeyPair(bits int) (*RSAKeyPair, error) {
+	key := &RSAKeyPair{}
 	var err error
 
 	key.PrivateKey, err = rsa.GenerateKey(rand.Reader, bits)
