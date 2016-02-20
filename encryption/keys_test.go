@@ -6,22 +6,22 @@ import (
 )
 
 func TestGeneratedEncodingDecoding(t *testing.T) {
-	privateKey, publicKey, err := GenerateKeyPair(2048)
+	key, err := GenerateKeyPair(2048)
 	if err != nil {
 		t.Error(err)
 	}
-	encodedPrivate := EncodePrivateKey(privateKey)
+	encodedPrivate := key.EncodePrivateKey()
 	//encodedPublic, err := EncodePublicKey(publicKey)
 	if err != nil {
 		t.Error(err)
 	}
 
-	decodedPrivateKey, decodedPublicKey, decodedErr := DecodePem(encodedPrivate)
+	decodedKey, decodedErr := DecodePem(encodedPrivate)
 
-	if !reflect.DeepEqual(decodedPrivateKey, privateKey) {
+	if !reflect.DeepEqual(decodedKey.PrivateKey, key.PrivateKey) {
 		t.Error("Decoded Pem does not matched orginal privateKey")
 	}
-	if !reflect.DeepEqual(decodedPublicKey, publicKey) {
+	if !reflect.DeepEqual(decodedKey.PublicKey, key.PublicKey) {
 		t.Error("Decoded Pem does not matched orginal publicKey")
 	}
 	if decodedErr != nil {
@@ -31,7 +31,7 @@ func TestGeneratedEncodingDecoding(t *testing.T) {
 }
 
 func TestInvalidBitkeyGeneration(t *testing.T) {
-	_, _, err := GenerateKeyPair(1)
+	_, err := GenerateKeyPair(1)
 	if err != nil {
 	} else {
 		t.Error(err)
