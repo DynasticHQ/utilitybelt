@@ -15,12 +15,24 @@ type RSAKeyPair struct {
 	PublicKey  *rsa.PublicKey
 }
 
+//Sign will sign the the payload with its Private Key.
+//Only the system with the corresponding PublicKey will be able to validate this message.
 func (key *RSAKeyPair) Sign(payLoad []byte) ([]byte, error) {
 	rng := rand.Reader
-	signedPayload := sha256.Sum256(payLoad)
+	hashedPayload := sha256.Sum256(payLoad)
 
-	signature, err := rsa.SignPKCS1v15(rng, key.PrivateKey, crypto.SHA256, signedPayload[:])
+	signature, err := rsa.SignPKCS1v15(rng, key.PrivateKey, crypto.SHA256, hashedPayload[:])
 	return signature, err
+}
+
+//VerifySignature will validate the signature and the payload using the PublicKey of which the signature originates from.
+func (key *RSAKeyPair) VerifySignature(signature []byte, payload []byte) bool {
+	hashedPayload := sha256.Sum256(payload)
+	err := rsa.VerifyPKCS1v15(key.PublicKey, crypto.SHA256, hashedPayload[:], signature)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 //EncodePrivateKey Returns the PEM encoded format in bytes.

@@ -1,7 +1,6 @@
 package encryption
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -52,7 +51,6 @@ func TestDecodeOfPublicKeyOnly(t *testing.T) {
 	if decodedErr != nil {
 		t.Error("Decoding failed", decodedErr)
 	}
-	fmt.Println(decodedKey.PrivateKey)
 }
 
 func TestInvalidBitkeyGeneration(t *testing.T) {
@@ -61,4 +59,25 @@ func TestInvalidBitkeyGeneration(t *testing.T) {
 	} else {
 		t.Error(err)
 	}
+}
+
+func TestMessageSigningAndValidation(t *testing.T) {
+	key, err := GenerateKeyPair(2048)
+	if err != nil {
+		t.Error(err)
+	}
+
+	goodPayload := []byte("This is a good test")
+	badPayload := []byte("This is a bad test")
+	goodSignature, goodSigErr := key.Sign(goodPayload)
+	if goodSigErr != nil {
+		t.Error(goodSigErr)
+	}
+	if !key.VerifySignature(goodSignature, goodPayload) {
+		t.Error("InvalidSignature")
+	}
+	if key.VerifySignature(goodSignature, badPayload) {
+		t.Error("Validated incorrect signature")
+	}
+
 }
