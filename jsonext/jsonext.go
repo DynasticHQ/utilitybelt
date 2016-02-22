@@ -1,4 +1,4 @@
-package utils
+package jsonext
 
 import (
 	"bytes"
