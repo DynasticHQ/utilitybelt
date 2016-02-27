@@ -10,22 +10,28 @@ import (
 	"errors"
 )
 
+//RSAKeyPair will sign, validate, decrypt and encrypt messages.
+//As well as encode and decode private/public keys to and from PEM format.
 type RSAKeyPair struct {
 	PrivateKey *rsa.PrivateKey
 	PublicKey  *rsa.PublicKey
 }
 
 //Sign will sign the the payload with its Private Key.
-//Only the system with the corresponding PublicKey will be able to validate this message.
+//Only the system with the corresponding PublicKey will be able to
+//validate this message.
 func (key *RSAKeyPair) Sign(payLoad []byte) ([]byte, error) {
 	rng := rand.Reader
 	hashedPayload := sha256.Sum256(payLoad)
 
-	signature, err := rsa.SignPKCS1v15(rng, key.PrivateKey, crypto.SHA256, hashedPayload[:])
+	signature, err := rsa.SignPKCS1v15(
+		rng, key.PrivateKey, crypto.SHA256, hashedPayload[:],
+	)
 	return signature, err
 }
 
-//VerifySignature will validate the signature and the payload using the PublicKey of which the signature originates from.
+//VerifySignature will validate the signature and the payload using the
+//PublicKey of which the signature originates from.
 func (key *RSAKeyPair) VerifySignature(signature []byte, payload []byte) bool {
 	hashedPayload := sha256.Sum256(payload)
 	err := rsa.VerifyPKCS1v15(key.PublicKey, crypto.SHA256, hashedPayload[:], signature)
@@ -72,6 +78,7 @@ func (key *RSAKeyPair) EncodePublicKey() ([]byte, error) {
 	return pemData, err
 }
 
+//DecodePublicKey will decode an ASN1 der encoded PEM into a rsa.PublicKey.
 func DecodePublicKey(asn1Der []byte) (*RSAKeyPair, error) {
 	key := &RSAKeyPair{}
 	var decodedBlock *pem.Block
@@ -88,7 +95,7 @@ func DecodePublicKey(asn1Der []byte) (*RSAKeyPair, error) {
 	return key, err
 }
 
-//DecodePem will decode an ASN1 der encoded form into a Private and Public key
+//DecodePem will decode an ASN1 der encoded PEM into a Private and Public key
 func DecodePem(asn1Der []byte) (*RSAKeyPair, error) {
 	key := &RSAKeyPair{}
 	var decodedBlock *pem.Block

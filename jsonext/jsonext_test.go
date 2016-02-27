@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPrettyJson(t *testing.T) {
+func TestPrettyJSON(t *testing.T) {
 	type multi [][]byte
 	testBytes := multi{
 		[]byte(`{"hello": "world"}`),
@@ -24,7 +24,7 @@ func TestPrettyJson(t *testing.T) {
 }`, `"Foo"="Bar"`,
 	}
 	for i, val := range testBytes {
-		transformed, err := PrettyJson(val)
+		transformed, err := PrettyJSON(val)
 		switch {
 		case err != nil && i != 2:
 			t.Error(err)

@@ -18,13 +18,15 @@ func TestGeneratedEncodingDecoding(t *testing.T) {
 
 	decodedKey, decodedErr := DecodePem(encodedPrivate)
 
-	if !reflect.DeepEqual(decodedKey.PrivateKey, key.PrivateKey) {
+	switch {
+
+	case !reflect.DeepEqual(decodedKey.PrivateKey, key.PrivateKey):
 		t.Error("Decoded Pem does not matched orginal privateKey")
-	}
-	if !reflect.DeepEqual(decodedKey.PublicKey, key.PublicKey) {
+
+	case !reflect.DeepEqual(decodedKey.PublicKey, key.PublicKey):
 		t.Error("Decoded Pem does not matched orginal publicKey")
-	}
-	if decodedErr != nil {
+
+	case decodedErr != nil:
 		t.Error("Decoding failed", decodedErr)
 	}
 
@@ -42,13 +44,15 @@ func TestDecodeOfPublicKeyOnly(t *testing.T) {
 
 	decodedKey, decodedErr := DecodePublicKey(encodedPublic)
 
-	if !reflect.DeepEqual(decodedKey.PublicKey, key.PublicKey) {
+	switch {
+
+	case !reflect.DeepEqual(decodedKey.PublicKey, key.PublicKey):
 		t.Error("Decoded PublicKey does not matched orginal key.PublicKey")
-	}
-	if decodedKey.PrivateKey != nil {
+
+	case decodedKey.PrivateKey != nil:
 		t.Error("PrivateKey was also decoded")
-	}
-	if decodedErr != nil {
+
+	case decodedErr != nil:
 		t.Error("Decoding failed", decodedErr)
 	}
 }
@@ -69,14 +73,18 @@ func TestMessageSigningAndValidation(t *testing.T) {
 
 	goodPayload := []byte("This is a good test")
 	badPayload := []byte("This is a bad test")
+
 	goodSignature, goodSigErr := key.Sign(goodPayload)
-	if goodSigErr != nil {
+
+	switch {
+
+	case goodSigErr != nil:
 		t.Error(goodSigErr)
-	}
-	if !key.VerifySignature(goodSignature, goodPayload) {
+
+	case !key.VerifySignature(goodSignature, goodPayload):
 		t.Error("InvalidSignature")
-	}
-	if key.VerifySignature(goodSignature, badPayload) {
+
+	case key.VerifySignature(goodSignature, badPayload):
 		t.Error("Validated incorrect signature")
 	}
 
