@@ -1,4 +1,14 @@
 language: go
+go_import_path: dynastic.ninja/dynastic/utilitybelt
 
 go:
   - 1.6
+
+before_install:
+  - go get github.com/go-playground/overalls
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
+
+script:
+  - overalls -project=dynastic.ninja/dynastic/utilitybelt -covermode=count -debug
+  - $HOME/gopath/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci
